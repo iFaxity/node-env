@@ -25,7 +25,7 @@ function parse(data) {
       // Trim the sourrounding quotes & spaces
       value = value.replace(TRIM_REGEX, '').trim();
     }
-  
+
     vars[key] = value || '';
     return vars;
   }, {});
