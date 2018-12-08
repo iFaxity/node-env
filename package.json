@@ -1,7 +1,10 @@
 {
   "name": "@ifaxity/env",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "main": "index.js",
   "author": "Christian Norrman <christian@faxity.se>",
-  "license": "MIT"
+  "license": "MIT",
+  "engines": {
+    "node": ">=6"
+  }
 }
