@@ -71,9 +71,10 @@ const { NODE_ENV, PORT, TRUE } = require('@ifaxity/env');
 However `parse` & `config` is reserved as functions in this module.
 
 ### [env.config([, opts])](#config)
-Signs a JWT token with a payload and a secret key.
 
-Returns a string with the signed JWT Token.
+Configures and loads the environment variables from a file.
+
+Returns the parsed variables in a form of an object
 
 #### Parameters
 * opts {Object} - Optional options. If any of the optional options is not of a valid type or if its value is not valid then a `TokenError` will be thrown.
