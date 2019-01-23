@@ -74,7 +74,8 @@ However `parse` & `config` is reserved as functions in this module.
 
 Configures and loads the environment variables from a file.
 
-Returns the parsed variables in a form of an object
+Returns the parsed variables in a form of an object.
+However unlike the module these variables are not proxied.
 
 #### Parameters
 * opts {Object} - Optional options. If any of the optional options is not of a valid type or if its value is not valid then a `TokenError` will be thrown.
@@ -84,6 +85,8 @@ Returns the parsed variables in a form of an object
   * `path {String|Array}` - Full path to the .env file. Default value is the current working directory's .env file.
 
   * `env {Object}` - Object to set the config options to. Default value is process.env.
+
+  * `defaults {Object}` - Object to set default values if a key doesn't exist in the .env file. Default value is null.
 
 #### Basic Usage
 
