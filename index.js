@@ -3,6 +3,12 @@ const path = require('path');
 
 const KEY_VALUE_REGEX = /^([\w.-]+)\s*=\s*(.*)$/; // key=value regex
 const TRIM_REGEX = /(^['"]|['"]$)/g; // Regex for enclosing string notations
+const DEFAULT_OPTS = {
+  encoding: 'utf8',
+  path: path.resolve(process.cwd(), '.env'),
+  env: process.env,
+  defaults: null,
+};
 
 // Parses src into an Object
 function parse(data) {
@@ -33,13 +39,13 @@ function parse(data) {
 
 // Populates process.env from .env file
 function config(opts = {}) {
-  opts = Object.assign({
-    encoding: 'utf8',
-    path: path.resolve(process.cwd(), '.env'),
-    env: process.env,
-  }, opts);
+  opts = Object.assign({}, DEFAULT_OPTS, opts);
+  let vars = parse(fs.readFileSync(opts.path, opts.encoding));
 
-  const vars = parse(fs.readFileSync(opts.path, opts.encoding));
+  // Assign default values if default is an object
+  if (opts.defaults && typeof opts.defaults == 'object') {
+    vars = Object.assign({}, opts.defaults, vars);
+  }
 
   // Assign the variables
   for (const [ key, value ] of Object.entries(vars)) {
@@ -54,7 +60,7 @@ function config(opts = {}) {
 }
 
 module.exports = new Proxy({}, {
-  get(obj, prop) {
+  get(_, prop) {
     // Main functions
     if (prop == 'config') return config;
     if (prop == 'parse') return parse;
@@ -73,7 +79,7 @@ module.exports = new Proxy({}, {
     }
     return null;
   },
-  set(obj, prop) {
-    throw new TypeError('Env properties are not writable');
+  set() {
+    console.error('Env properties are not writable');
   }
 });
