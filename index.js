@@ -18,7 +18,7 @@ function parse(data) {
   .map(line => {
     line = line.trim();
     // ignore empty lines & comments
-    return !line.startsWith('#') && line && line.match(KEY_VALUE_REGEX);
+    return line && !line.startsWith('#') && line.match(KEY_VALUE_REGEX);
   })
   // Remove all null & falsy matches
   .filter(match => match)
