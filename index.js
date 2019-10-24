@@ -5,7 +5,7 @@ const KEY_VALUE_REGEX = /^([\w.-]+)\s*=\s*(.*)$/; // key=value regex
 const TRIM_REGEX = /(^['"]|['"]$)/g; // Regex for enclosing string notations
 const DEFAULT_OPTS = {
   encoding: 'utf8',
-  path: path.resolve(process.cwd(), '.env'),
+  path: process.cwd(), // path were we look for .env files
   env: process.env,
   defaults: null,
 };
@@ -15,32 +15,54 @@ function parse(data) {
   const lines = data.toString().split('\n');
 
   return lines
-  .map(line => {
-    line = line.trim();
-    // ignore empty lines & comments
-    return line && !line.startsWith('#') && line.match(KEY_VALUE_REGEX);
-  })
-  // Remove all null & falsy matches
-  .filter(match => match)
-  .reduce((vars, [, key, value ]) => {
-    if (value) {
-      if (value.startsWith('"') && value.endsWith('"')) {
-        value = value.replace(/\\n/gm, '\n');
-      }
-  
-      // Trim the sourrounding quotes & spaces
-      value = value.replace(TRIM_REGEX, '').trim();
-    }
+    .map(line => {
+      line = line.trim();
+      // ignore empty lines & comments
+      return line && !line.startsWith('#') && line.match(KEY_VALUE_REGEX);
+    })
+    // Remove all null & falsy matches
+    .filter(match => match)
+    .reduce((vars, [, key, value ]) => {
+      if (value) {
+        if (value.startsWith('"') && value.endsWith('"')) {
+          value = value.replace(/\\n/gm, '\n');
+        }
 
-    vars[key] = value || '';
-    return vars;
-  }, {});
+        // Trim the sourrounding quotes & spaces
+        value = value.replace(TRIM_REGEX, '').trim();
+      }
+
+      vars[key] = value || '';
+      return vars;
+    }, {});
+}
+
+function getConfig(root, encoding) {
+  const files = [ '.env' ];
+
+  if (process.env.NODE_ENV) {
+    files.push(`.env.${process.env.NODE_ENV}`);
+  }
+
+  const config = files.map(file => {
+    try {
+      return parse(fs.readFileSync(path.join(root, file), encoding));
+    } catch (ex) {
+      if (ex.code == 'ENOENT') {
+        return {};
+      } else {
+        throw ex;
+      }
+    }
+  });
+
+  return Object.assign({}, ...config);
 }
 
 // Populates process.env from .env file
 function config(opts = {}) {
   opts = Object.assign({}, DEFAULT_OPTS, opts);
-  let vars = parse(fs.readFileSync(opts.path, opts.encoding));
+  let vars = getConfig(opts.path, opts.encoding);
 
   // Assign default values if default is an object
   if (opts.defaults && typeof opts.defaults == 'object') {
@@ -77,9 +99,8 @@ module.exports = new Proxy({}, {
       }
       return value;
     }
-    return null;
   },
   set() {
-    console.error('Env properties are not writable');
+    throw new Error('Env properties are not writable');
   }
 });
