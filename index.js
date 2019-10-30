@@ -3,6 +3,7 @@ const path = require('path');
 
 const KEY_VALUE_REGEX = /^([\w.-]+)\s*=\s*(.*)$/; // key=value regex
 const TRIM_REGEX = /(^['"]|['"]$)/g; // Regex for enclosing string notations
+const FILES = [ '.env', '.env.local' ];
 const DEFAULT_OPTS = {
   encoding: 'utf8',
   path: process.cwd(), // path were we look for .env files
@@ -38,10 +39,10 @@ function parse(data) {
 }
 
 function getConfig(root, encoding) {
-  const files = [ '.env' ];
+  const files = [ ...FILES ];
 
   if (process.env.NODE_ENV) {
-    files.push(`.env.${process.env.NODE_ENV}`);
+    files.splice(1, 0, `.env.${process.env.NODE_ENV}`);
   }
 
   const config = files.map(file => {
